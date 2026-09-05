@@ -333,6 +333,14 @@ body {
     flex-wrap: wrap;
 }
 
+.repay-form {
+    display: flex;
+    gap: 14px;
+    width: 100%;
+    align-items: flex-end;
+    flex-wrap: wrap;
+}
+
 .form-group {
     display: flex;
     flex-direction: column;
@@ -401,7 +409,8 @@ body {
 
 /* ---- АДАПТИВ ---- */
 @media (max-width: 700px) {
-    .expense-form {
+    .expense-form,
+    .repay-form {
         flex-direction: column;
         gap: 10px;
     }

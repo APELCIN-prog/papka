@@ -202,6 +202,48 @@ document.getElementById('addExpenseBtn')?.addEventListener('click', function() {
 });
 
 // ========================
+// 8. ВОЗВРАТ ДОЛГА
+// ========================
+document.getElementById('repayDebtBtn')?.addEventListener('click', function() {
+    const from = document.getElementById('repayFrom').value;
+    const to = document.getElementById('repayTo').value;
+    const amount = Number(document.getElementById('repayAmount').value);
+
+    if (from === to) {
+        alert('Выберите разных людей');
+        return;
+    }
+
+    if (!amount || amount <= 0) {
+        alert('Введите сумму возврата');
+        return;
+    }
+
+    const debt = debtData.find((item) => item.from === from && item.to === to);
+    if (!debt) {
+        alert(`У ${from} нет долга перед ${to}`);
+        return;
+    }
+
+    if (amount > debt.amount) {
+        alert(`Сумма не может быть больше долга: ${debt.amount.toLocaleString()} ₽`);
+        return;
+    }
+
+    debt.amount -= amount;
+    if (debt.amount === 0) {
+        debtData.splice(debtData.indexOf(debt), 1);
+    }
+
+    renderDebts();
+    this.textContent = '✅ Возвращено';
+    setTimeout(() => {
+        this.textContent = '↩️ Вернуть';
+    }, 1500);
+    document.getElementById('repayAmount').value = '';
+});
+
+// ========================
 // 5. ЗАПУСК
 // ========================
 document.addEventListener('DOMContentLoaded', () => {
