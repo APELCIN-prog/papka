@@ -7,9 +7,52 @@
     <title>Сетка дашборда</title>
   </head>
   <body>
+    <section class="auth-screen" id="authScreen">
+      <div class="auth-card">
+        <div class="auth-brand">Фин<span>.</span></div>
+        <p class="auth-kicker">Личный бюджет</p>
+        <h1 id="authTitle">С возвращением</h1>
+        <p class="auth-subtitle" id="authSubtitle">Войди, чтобы продолжить работу с бюджетом</p>
+
+        <div class="auth-switcher" role="tablist" aria-label="Авторизация">
+          <button class="auth-switch active" type="button" data-auth-mode="login">Войти</button>
+          <button class="auth-switch" type="button" data-auth-mode="register">Регистрация</button>
+        </div>
+
+        <form class="auth-form" id="authForm">
+          <div class="auth-field auth-name-field" hidden>
+            <label for="authName">Имя</label>
+            <input id="authName" type="text" autocomplete="name" placeholder="Как к тебе обращаться" />
+          </div>
+          <div class="auth-field">
+            <label for="authEmail">Email</label>
+            <input id="authEmail" type="email" autocomplete="email" placeholder="you@example.com" required />
+          </div>
+          <div class="auth-field">
+            <label for="authPassword">Пароль</label>
+            <input id="authPassword" type="password" autocomplete="current-password" placeholder="Минимум 6 символов" minlength="6" required />
+          </div>
+          <p class="auth-error" id="authError" role="alert"></p>
+          <button class="auth-submit" type="submit" id="authSubmit">Войти в кабинет <span>→</span></button>
+        </form>
+        <p class="auth-note">Данные этого прототипа сохраняются только в браузере.</p>
+      </div>
+    </section>
+
     <div class="dashboard">
       <!-- Верхняя часть -->
       <div class="top-section">
+        <!-- БЛОК А: Задолженности -->
+        <div class="small-block debt-block">
+          <div class="debt-container">
+            <div class="debt-title">📋 Задолженности</div>
+            <div class="debt-list" id="debtList">
+              <!-- Сюда JS добавит записи -->
+            </div>
+            <div class="debt-total" id="debtTotal">Итого: 0 ₽</div>
+          </div>
+        </div>
+
         <!-- БОЛЬШОЙ БЛОК с диаграммой -->
         <div class="big-block">
           <div class="chart-container">
@@ -30,17 +73,30 @@
 
         <!-- Правая колонка (А и Б) -->
         <div class="right-column">
-          <!-- БЛОК А: Задолженности -->
-          <div class="small-block top">
-            <div class="debt-container">
-              <div class="debt-title">📋 Задолженности</div>
-              <div class="debt-list" id="debtList">
-                <!-- Сюда JS добавит записи -->
+          <div class="small-block bottom ai-block">
+            <div class="ai-chat">
+              <div class="ai-chat-header">
+                <div>
+                  <div class="ai-title">🤖 Фин</div>
+                  <div class="ai-status"><span></span> Помогает с бюджетом</div>
+                </div>
+                <div class="ai-badge">AI</div>
               </div>
-              <div class="debt-total" id="debtTotal">Итого: 0 ₽</div>
+              <div class="chat-messages" id="chatMessages" aria-live="polite">
+                <div class="chat-message agent-message">
+                  Привет! Напиши трату вроде «500 на еду» или спроси про долги.
+                </div>
+              </div>
+              <div class="chat-quick-actions">
+                <button class="quick-action" type="button" data-chat-prompt="Какие у меня долги?">Долги</button>
+                <button class="quick-action" type="button" data-chat-prompt="Как сэкономить?">Сэкономить</button>
+              </div>
+              <form class="chat-form" id="chatForm">
+                <input id="chatInput" type="text" autocomplete="off" placeholder="Например: 500 на еду" aria-label="Сообщение агенту" />
+                <button type="submit" aria-label="Отправить сообщение">➤</button>
+              </form>
             </div>
           </div>
-          <div class="small-block bottom">БЛОК Б</div>
         </div>
       </div>
 

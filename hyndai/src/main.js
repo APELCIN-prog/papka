@@ -112,6 +112,64 @@ function renderLegend(total) {
     });
 }
 
+function addChatMessage(text, type) {
+    const container = document.getElementById('chatMessages');
+    if (!container) return;
+
+    const message = document.createElement('div');
+    message.className = `chat-message ${type}-message`;
+    message.textContent = text;
+    container.appendChild(message);
+}
+
+function getBudgetAdvice() {
+    const totalSpent = expenseData.reduce((sum, item) => sum + item.amount, 0);
+    const largestCategory = [...expenseData].sort((first, second) => second.amount - first.amount)[0];
+    const debtTotal = debtData.reduce((sum, debt) => sum + debt.amount, 0);
+
+    return `Зафиксировано ${totalSpent.toLocaleString()} ₽. Больше всего ушло у ${largestCategory.name}: ${largestCategory.amount.toLocaleString()} ₽. Сейчас долгов на ${debtTotal.toLocaleString()} ₽. Попробуй сократить самые крупные траты на 10%.`;
+}
+
+function processChatMessage(text) {
+    const normalizedText = text.toLowerCase();
+    const debtTotal = debtData.reduce((sum, debt) => sum + debt.amount, 0);
+    const largestDebt = [...debtData].sort((first, second) => second.amount - first.amount)[0];
+    const expenseMatch = normalizedText.match(/(\d[\d\s]*)\s*(?:₽|руб(?:лей|ля)?|р)?\s*(?:на|за)\s+([а-яё]+)/i);
+
+    if (expenseMatch) {
+        const amount = Number(expenseMatch[1].replace(/\s/g, ''));
+        const categoryName = expenseMatch[2];
+        const categoryMap = { еда: 'Маша', транспорт: 'Петя', развлечения: 'Оля', услуги: 'Коля', другое: 'Дима' };
+        const payerName = categoryMap[categoryName] || 'Маша';
+        const payer = expenseData.find((item) => item.name === payerName);
+
+        if (payer) {
+            payer.amount += amount;
+            drawChart();
+            return `Готово: добавил ${amount.toLocaleString()} ₽ в категорию «${categoryName}».`;
+        }
+    }
+
+    if (normalizedText.includes('долг')) {
+        if (!largestDebt) return 'Отлично, все долги закрыты.';
+        return `Всего долгов на ${debtTotal.toLocaleString()} ₽. Самый большой: ${largestDebt.from} → ${largestDebt.to}, ${largestDebt.amount.toLocaleString()} ₽.`;
+    }
+
+    if (normalizedText.includes('сэконом') || normalizedText.includes('бюджет') || normalizedText.includes('оптим')) {
+        return getBudgetAdvice();
+    }
+
+    return 'Я умею записывать траты («500 на еду»), показывать долги и подсказывать, где можно сэкономить.';
+}
+
+function handleChatMessage(text) {
+    const trimmedText = text.trim();
+    if (!trimmedText) return;
+
+    addChatMessage(trimmedText, 'user');
+    window.setTimeout(() => addChatMessage(processChatMessage(trimmedText), 'agent'), 180);
+}
+
 // ========================
 // 4. РЕНДЕР ЗАДОЛЖЕННОСТЕЙ (БЛОК А)
 // ========================
@@ -251,3 +309,80 @@ document.addEventListener('DOMContentLoaded', () => {
     renderDebts();
     console.log('📊 Диаграмма со свечением загружена');
 });
+
+document.getElementById('chatForm')?.addEventListener('submit', (event) => {
+    event.preventDefault();
+    const input = document.getElementById('chatInput');
+    handleChatMessage(input.value);
+    input.value = '';
+    input.focus();
+});
+
+document.querySelectorAll('.quick-action').forEach((button) => {
+    button.addEventListener('click', () => handleChatMessage(button.dataset.chatPrompt));
+});
+
+// ========================
+// 9. ЛОКАЛЬНАЯ АВТОРИЗАЦИЯ
+// ========================
+let authMode = 'login';
+
+function setAuthMode(mode) {
+    authMode = mode;
+    const isRegister = mode === 'register';
+    document.querySelectorAll('.auth-switch').forEach((button) => {
+        button.classList.toggle('active', button.dataset.authMode === mode);
+    });
+    document.querySelector('.auth-name-field').hidden = !isRegister;
+    document.getElementById('authName').required = isRegister;
+    document.getElementById('authTitle').textContent = isRegister ? 'Создай аккаунт' : 'С возвращением';
+    document.getElementById('authSubtitle').textContent = isRegister
+        ? 'Сохрани расходы и долги в своём кабинете'
+        : 'Войди, чтобы продолжить работу с бюджетом';
+    document.getElementById('authSubmit').innerHTML = `${isRegister ? 'Создать аккаунт' : 'Войти в кабинет'} <span>→</span>`;
+    document.getElementById('authError').textContent = '';
+}
+
+function getStoredUser() {
+    return JSON.parse(localStorage.getItem('finUser') || 'null');
+}
+
+function showDashboard() {
+    document.body.classList.add('authenticated');
+    document.getElementById('authScreen').setAttribute('aria-hidden', 'true');
+}
+
+document.querySelectorAll('.auth-switch').forEach((button) => {
+    button.addEventListener('click', () => setAuthMode(button.dataset.authMode));
+});
+
+document.getElementById('authForm')?.addEventListener('submit', (event) => {
+    event.preventDefault();
+    const name = document.getElementById('authName').value.trim();
+    const email = document.getElementById('authEmail').value.trim().toLowerCase();
+    const password = document.getElementById('authPassword').value;
+    const error = document.getElementById('authError');
+
+    if (authMode === 'register') {
+        if (!name) {
+            error.textContent = 'Укажи имя';
+            return;
+        }
+        if (getStoredUser()) {
+            error.textContent = 'Локальный аккаунт уже существует. Войди в него.';
+            return;
+        }
+        localStorage.setItem('finUser', JSON.stringify({ name, email, password }));
+        showDashboard();
+        return;
+    }
+
+    const user = getStoredUser();
+    if (!user || user.email !== email || user.password !== password) {
+        error.textContent = 'Неверный email или пароль';
+        return;
+    }
+    showDashboard();
+});
+
+if (getStoredUser()) showDashboard();
