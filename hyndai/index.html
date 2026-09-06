@@ -69,6 +69,7 @@
               <!-- Сюда JS добавит участников -->
             </div>
           </div>
+
         </div>
 
         <!-- Правая колонка (А и Б) -->
@@ -100,16 +101,13 @@
         </div>
       </div>
 
-      <!-- Нижняя часть -->
       <div class="bottom-section">
         <div class="long-block">
-          <!-- ВКЛАДКИ -->
           <div class="tabs">
             <button class="tab active" data-tab="expense">Расход</button>
             <button class="tab" data-tab="repay">Вернуть долг</button>
           </div>
 
-          <!-- КОНТЕНТ ВКЛАДКИ "РАСХОД" -->
           <div class="tab-content active" id="tabExpense">
             <div class="expense-form">
               <div class="form-group">
@@ -140,7 +138,6 @@
             </div>
           </div>
 
-          <!-- КОНТЕНТ ВКЛАДКИ "ВЕРНУТЬ ДОЛГ" -->
           <div class="tab-content" id="tabRepay">
             <div class="repay-form">
               <div class="form-group">
@@ -171,7 +168,16 @@
             </div>
           </div>
         </div>
+
+          <section class="transactions-panel" aria-label="Список транзакций">
+            <div class="transactions-heading">
+              <h2>Все транзакции</h2>
+              <span id="transactionCount">0 операций</span>
+            </div>
+            <div class="transactions-list" id="transactionsList"></div>
+          </section>
       </div>
+
     </div>
 
     <!-- Подключаем JS -->

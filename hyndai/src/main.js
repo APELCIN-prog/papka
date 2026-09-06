@@ -120,6 +120,7 @@ function addChatMessage(text, type) {
     message.className = `chat-message ${type}-message`;
     message.textContent = text;
     container.appendChild(message);
+    container.scrollTop = container.scrollHeight;
 }
 
 function getBudgetAdvice() {
@@ -146,6 +147,7 @@ function processChatMessage(text) {
         if (payer) {
             payer.amount += amount;
             drawChart();
+            renderTransactions();
             return `Готово: добавил ${amount.toLocaleString()} ₽ в категорию «${categoryName}».`;
         }
     }
@@ -209,6 +211,40 @@ function renderDebts() {
     }
 
     totalEl.textContent = `Итого: ${total.toLocaleString()} ₽`;
+    renderTransactions();
+}
+
+function renderTransactions() {
+    const container = document.getElementById('transactionsList');
+    const count = document.getElementById('transactionCount');
+    if (!container || !count) return;
+
+    const transactions = [
+        ...expenseData.map((item) => ({
+            title: `Расход · ${item.name}`,
+            detail: 'Личные траты',
+            amount: item.amount,
+            type: 'expense',
+        })),
+        ...debtData.map((debt) => ({
+            title: `Долг · ${debt.from} → ${debt.to}`,
+            detail: 'Ожидает возврата',
+            amount: debt.amount,
+            type: 'debt',
+        })),
+    ];
+
+    count.textContent = `${transactions.length} ${transactions.length === 1 ? 'операция' : 'операций'}`;
+    container.innerHTML = transactions.map((transaction) => `
+        <div class="transaction-item">
+            <span class="transaction-icon ${transaction.type}">${transaction.type === 'expense' ? '−' : '↗'}</span>
+            <span class="transaction-info">
+                <b>${transaction.title}</b>
+                <small>${transaction.detail}</small>
+            </span>
+            <strong class="transaction-amount ${transaction.type}">${transaction.type === 'expense' ? '−' : ''}${transaction.amount.toLocaleString()} ₽</strong>
+        </div>
+    `).join('');
 }
 
 // ========================
@@ -307,6 +343,7 @@ document.getElementById('repayDebtBtn')?.addEventListener('click', function() {
 document.addEventListener('DOMContentLoaded', () => {
     drawChart();
     renderDebts();
+    renderTransactions();
     console.log('📊 Диаграмма со свечением загружена');
 });
 
